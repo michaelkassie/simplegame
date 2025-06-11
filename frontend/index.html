@@ -4,23 +4,33 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Guess the Number Game</title>
-<link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="game.html">Play Game</a>
+    <a href="leaderboard.html">Leaderboard</a>
+  </nav>
+
   <header>
     <h1>Welcome to Guess the Number Game!</h1>
   </header>
+
   <main>
     <p>Try to guess the number I'm thinking of! Compete for the top spot on the leaderboard.</p>
     <div class="button-container">
       <button id="play-btn">Play Game</button>
       <button id="login-btn">Login</button>
       <button id="signup-btn">Sign Up</button>
+      <button id="logout-btn" style="display: none;">Logout</button>
     </div>
   </main>
+
   <footer>
     <p>&copy; 2025 Guess the Number Game</p>
   </footer>
-  <script src="scripts.js"></script>
+
+  <script src="js/scripts.js"></script>
 </body>
 </html>

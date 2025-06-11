@@ -4,7 +4,13 @@ document.addEventListener("DOMContentLoaded", function () {
   fetch("http://localhost:3000/leaderboard")
     .then(response => response.json())
     .then(data => {
-      const { leaderboard } = data;
+      // Use correct property if backend returns { leaderboard: [...] }
+      const leaderboard = Array.isArray(data) ? data : data.leaderboard;
+
+      if (!Array.isArray(leaderboard)) {
+        throw new Error("Leaderboard data is not an array.");
+      }
+
       leaderboard.forEach((entry, index) => {
         const row = document.createElement("tr");
         row.innerHTML = `
@@ -15,6 +21,10 @@ document.addEventListener("DOMContentLoaded", function () {
         `;
         leaderboardBody.appendChild(row);
       });
+
+      if (leaderboard.length === 0) {
+        leaderboardBody.innerHTML = `<tr><td colspan="4">No scores yet. Be the first!</td></tr>`;
+      }
     })
     .catch(error => {
       console.error("Error fetching leaderboard:", error);

@@ -6,17 +6,26 @@ document.addEventListener("DOMContentLoaded", function () {
   const feedback = document.getElementById("feedback");
   const guessHistoryEl = document.getElementById("guess-history");
 
+  // Display the current logged-in user if available
+  const currentUser = localStorage.getItem("currentUser");
+  if (currentUser) {
+    const welcomeMessage = document.createElement("p");
+    welcomeMessage.textContent = `Welcome, ${currentUser}!`;
+    document.body.prepend(welcomeMessage);
+  }
+
   // Start a new game on page load
   fetch("http://localhost:3000/start")
     .then(response => response.json())
     .then(data => {
-      feedback.textContent = data.message;
+      feedback.textContent = data.message || "Game started! Make your first guess.";
     })
     .catch(error => {
       feedback.textContent = "Error starting game.";
       console.error(error);
     });
 
+  // Handle guess submission
   submitGuess.addEventListener("click", function () {
     const guess = parseInt(guessInput.value);
     if (isNaN(guess) || guess < 1 || guess > 100) {
@@ -35,9 +44,8 @@ document.addEventListener("DOMContentLoaded", function () {
         guessHistory = data.guessHistory;
         guessHistoryEl.textContent = "Your guesses: " + guessHistory.join(", ");
 
-        // If the guess is correct, submit the score
         if (data.result === "correct") {
-          const playerName = prompt("Congratulations! Enter your name for the leaderboard:");
+          const playerName = currentUser || prompt("Congratulations! Enter your name for the leaderboard:");
           if (playerName) {
             const attempts = guessHistory.length;
             fetch("http://localhost:3000/submit-score", {
@@ -46,8 +54,8 @@ document.addEventListener("DOMContentLoaded", function () {
               body: JSON.stringify({ playerName, attempts })
             })
               .then(response => response.json())
-              .then(data => {
-                alert("Score submitted! See the leaderboard.");
+              .then(() => {
+                alert("Score submitted! Redirecting to leaderboard...");
                 window.location.href = "leaderboard.html";
               })
               .catch(error => {
