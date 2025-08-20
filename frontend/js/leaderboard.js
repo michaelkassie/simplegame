@@ -13,9 +13,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
       leaderboard.forEach((entry, index) => {
         const row = document.createElement("tr");
+        const trophyIcon = index === 0
+    ? `<img src="img/cup.jpg" alt="Trophy" style="width: 20px; vertical-align: middle; margin-right: 5px;" />`
+    : "";
         row.innerHTML = `
           <td>${index + 1}</td>
-          <td>${entry.playerName}</td>
+          <td>${trophyIcon}${entry.playerName}</td>
           <td>${entry.attempts}</td>
           <td>${new Date(entry.date).toLocaleString()}</td>
         `;
