@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Start a new game on page load
-  fetch("http://localhost:3000/start")
+  fetch(`${window.API_URL}/start`)
     .then(response => response.json())
     .then(data => {
       feedback.textContent = data.message || "Game started! Make your first guess.";

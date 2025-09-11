@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
   const leaderboardBody = document.getElementById("leaderboard-body");
 
-  fetch("http://localhost:3000/leaderboard")
+  fetch(`${window.API_URL}/start`)
     .then(response => response.json())
     .then(data => {
       // Use correct property if backend returns { leaderboard: [...] }
