@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", () => {
   let guessHistory = [];
 
   const guessInput = document.getElementById("guess-input");
@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const feedback = document.getElementById("feedback");
   const guessHistoryEl = document.getElementById("guess-history");
 
-  // Display the current logged-in user if available
+  // show logged-in user if any
   const currentUser = localStorage.getItem("currentUser");
   if (currentUser) {
     const welcomeMessage = document.createElement("p");
@@ -14,62 +14,71 @@ document.addEventListener("DOMContentLoaded", function () {
     document.body.prepend(welcomeMessage);
   }
 
-  // Start a new game on page load
-  fetch(`${window.API_URL}/start`)
-    .then(response => response.json())
-    .then(data => {
+  // helper: fetch with better errors
+  async function api(path, options) {
+    const url = `${window.API_URL}${path}`;
+    const res = await fetch(url, {
+      headers: { "Content-Type": "application/json" },
+      ...options,
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`HTTP ${res.status} ${url}\n${text.slice(0,200)}`);
+    }
+    return res.json();
+  }
+
+  // start new game on load (GET /start)
+  api("/start")
+    .then((data) => {
       feedback.textContent = data.message || "Game started! Make your first guess.";
+      guessHistory = [];
+      guessHistoryEl.textContent = "";
     })
-    .catch(error => {
+    .catch((err) => {
       feedback.textContent = "Error starting game.";
-      console.error(error);
+      console.error(err);
     });
 
-  // Handle guess submission
-  submitGuess.addEventListener("click", function () {
-    const guess = parseInt(guessInput.value);
-    if (isNaN(guess) || guess < 1 || guess > 100) {
+  // handle guess submission (POST /guess)
+  submitGuess.addEventListener("click", async () => {
+    const guess = Number.parseInt(guessInput.value, 10);
+    if (!Number.isInteger(guess) || guess < 1 || guess > 100) {
       feedback.textContent = "Please enter a valid number between 1 and 100.";
       return;
     }
 
-    fetch("http://localhost:3000/guess", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ guess })
-    })
-      .then(response => response.json())
-      .then(data => {
-        feedback.textContent = data.message;
-        guessHistory = data.guessHistory;
-        guessHistoryEl.textContent = "Your guesses: " + guessHistory.join(", ");
-
-        if (data.result === "correct") {
-          const playerName = currentUser || prompt("Congratulations! Enter your name for the leaderboard:");
-          if (playerName) {
-            const attempts = guessHistory.length;
-            fetch("http://localhost:3000/submit-score", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ playerName, attempts })
-            })
-              .then(response => response.json())
-              .then(() => {
-                alert("Score submitted! Redirecting to leaderboard...");
-                window.location.href = "leaderboard.html";
-              })
-              .catch(error => {
-                console.error("Error submitting score:", error);
-              });
-          }
-        }
-      })
-      .catch(error => {
-        feedback.textContent = "Error submitting guess.";
-        console.error(error);
+    try {
+      const data = await api("/guess", {
+        method: "POST",
+        body: JSON.stringify({ guess }),
       });
 
-    guessInput.value = "";
-    guessInput.focus();
+      if (data.message) feedback.textContent = data.message;
+      if (Array.isArray(data.guessHistory)) {
+        guessHistory = data.guessHistory;
+        guessHistoryEl.textContent = "Your guesses: " + guessHistory.join(", ");
+      }
+
+      if (data.result === "correct") {
+        const playerName =
+          currentUser || prompt("Congratulations! Enter your name for the leaderboard:");
+        if (playerName) {
+          const attempts = data.attempts ?? guessHistory.length;
+          await api("/submit-score", {
+            method: "POST",
+            body: JSON.stringify({ playerName, attempts }),
+          });
+          alert("Score submitted! Redirecting to leaderboard...");
+          window.location.href = "leaderboard.html";
+        }
+      }
+    } catch (err) {
+      feedback.textContent = "Error submitting guess.";
+      console.error(err);
+    } finally {
+      guessInput.value = "";
+      guessInput.focus();
+    }
   });
 });
