@@ -5,21 +5,26 @@ document.addEventListener("DOMContentLoaded", function () {
   const logoutButton = document.getElementById("logout-btn");
 
   // Navigate to different pages
-  playButton?.addEventListener("click", function () {
-    window.location.href = "game.html";
-  });
+  playButton?.addEventListener("click", () => (window.location.href = "game.html"));
+  loginButton?.addEventListener("click", () => (window.location.href = "signin.html"));
+  signupButton?.addEventListener("click", () => (window.location.href = "signup.html"));
 
-  loginButton?.addEventListener("click", function () {
-    window.location.href = "signin.html";
-  });
-
-  signupButton?.addEventListener("click", function () {
-    window.location.href = "signup.html";
-  });
+  // Safe storage helper
+  function safeGet(key) {
+    try {
+      return localStorage.getItem(key);
+    } catch {
+      return null; // fallback if storage unavailable
+    }
+  }
+  function safeRemove(key) {
+    try {
+      localStorage.removeItem(key);
+    } catch {}
+  }
 
   // Handle current user session
-  const currentUser = localStorage.getItem("currentUser");
-
+  const currentUser = safeGet("currentUser");
   if (currentUser) {
     // Show welcome message
     const welcome = document.createElement("p");
@@ -28,14 +33,14 @@ document.addEventListener("DOMContentLoaded", function () {
     document.body.prepend(welcome);
 
     // Hide login/signup, show logout
-    if (loginButton) loginButton.style.display = "none";
-    if (signupButton) signupButton.style.display = "none";
-    if (logoutButton) logoutButton.style.display = "inline-block";
+    loginButton && (loginButton.style.display = "none");
+    signupButton && (signupButton.style.display = "none");
+    logoutButton && (logoutButton.style.display = "inline-block");
   }
 
   // Logout functionality
   logoutButton?.addEventListener("click", () => {
-    localStorage.removeItem("currentUser");
+    safeRemove("currentUser");
     window.location.reload();
   });
 });

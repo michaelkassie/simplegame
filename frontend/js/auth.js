@@ -1,10 +1,37 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // Helper: load & save users
+  // Safe storage wrapper (falls back to in-memory if blocked)
+  function storageAvailable() {
+    try {
+      const x = "__test__";
+      localStorage.setItem(x, "1");
+      localStorage.removeItem(x);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+  const _mem = {};
+  const store = storageAvailable()
+    ? localStorage
+    : {
+        getItem: (k) => (_mem.hasOwnProperty(k) ? _mem[k] : null),
+        setItem: (k, v) => (_mem[k] = String(v)),
+        removeItem: (k) => delete _mem[k],
+      };
+
   function getUsers() {
-    return JSON.parse(localStorage.getItem("users")) || {};
+    try {
+      return JSON.parse(store.getItem("users")) || {};
+    } catch {
+      return {};
+    }
   }
   function saveUsers(users) {
-    localStorage.setItem("users", JSON.stringify(users));
+    try {
+      store.setItem("users", JSON.stringify(users));
+    } catch {
+      /* ignore */
+    }
   }
 
   // --- Sign Up ---
@@ -28,9 +55,9 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      users[username] = { password }; 
+      users[username] = { password }; // demo-only (plaintext)
       saveUsers(users);
-      localStorage.setItem("currentUser", username);
+      try { store.setItem("currentUser", username); } catch {}
 
       msg.textContent = "Account created! Redirecting...";
       setTimeout(() => (window.location.href = "index.html"), 1000);
@@ -58,7 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      localStorage.setItem("currentUser", username);
+      try { store.setItem("currentUser", username); } catch {}
       msg.textContent = "Signed in! Redirecting...";
       setTimeout(() => (window.location.href = "index.html"), 1000);
     });

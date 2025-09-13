@@ -1,10 +1,11 @@
 document.addEventListener("DOMContentLoaded", () => {
   const leaderboardBody = document.getElementById("leaderboard-body");
 
-  // tiny helper that also surfaces 4xx/5xx
+ 
   async function api(path) {
-    const url = `${window.API_URL}${path}`;
-    const res = await fetch(url);
+    const base = (typeof window.API_URL === "string" && window.API_URL) || "";
+    const url = `${base}${path}`;
+    const res = await fetch(url); 
     if (!res.ok) {
       const text = await res.text();
       throw new Error(`HTTP ${res.status} on ${url}\n${text.slice(0,200)}`);

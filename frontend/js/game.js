@@ -6,26 +6,37 @@ document.addEventListener("DOMContentLoaded", () => {
   const feedback = document.getElementById("feedback");
   const guessHistoryEl = document.getElementById("guess-history");
 
-  // show logged-in user if any
-  const currentUser = localStorage.getItem("currentUser");
+  // Safe read of currentUser 
+  function safeGet(key) {
+    try { return localStorage.getItem(key); } catch { return null; }
+  }
+
+  
+  const currentUser = safeGet("currentUser");
   if (currentUser) {
     const welcomeMessage = document.createElement("p");
     welcomeMessage.textContent = `Welcome, ${currentUser}!`;
     document.body.prepend(welcomeMessage);
   }
 
-  // helper: fetch with better errors
-  async function api(path, options) {
-    const url = `${window.API_URL}${path}`;
+  // helper: fetch with better errors 
+  async function api(path, options = {}) {
+    const base = (typeof window.API_URL === "string" && window.API_URL) || "";
+    const url = `${base}${path}`;
     const res = await fetch(url, {
-      headers: { "Content-Type": "application/json" },
-      ...options,
+      method: options.method || "GET",
+      headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+      body: options.body ?? undefined,
+      
     });
     if (!res.ok) {
       const text = await res.text();
-      throw new Error(`HTTP ${res.status} ${url}\n${text.slice(0,200)}`);
+      const err = new Error(`HTTP ${res.status} ${url}\n${text.slice(0, 200)}`);
+      err.status = res.status;
+      err.body = text;
+      throw err;
     }
-    return res.json();
+    try { return await res.json(); } catch { return {}; }
   }
 
   // start new game on load (GET /start)
@@ -40,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error(err);
     });
 
-  // handle guess submission (POST /guess)
+  // handle guess submission (POST /guess) with a one-time auto-retry
   submitGuess.addEventListener("click", async () => {
     const guess = Number.parseInt(guessInput.value, 10);
     if (!Number.isInteger(guess) || guess < 1 || guess > 100) {
@@ -48,11 +59,22 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    async function submitOnce() {
+      return api("/guess", { method: "POST", body: JSON.stringify({ guess }) });
+    }
+
     try {
-      const data = await api("/guess", {
-        method: "POST",
-        body: JSON.stringify({ guess }),
-      });
+      let data;
+      try {
+        data = await submitOnce();
+      } catch (err) {
+        if (err.status === 400 && /Game not started/i.test(err.body || "")) {
+          await api("/start");
+          data = await submitOnce();
+        } else {
+          throw err;
+        }
+      }
 
       if (data.message) feedback.textContent = data.message;
       if (Array.isArray(data.guessHistory)) {
