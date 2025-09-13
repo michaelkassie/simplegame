@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      users[username] = { password }; // ⚠️ plain text, OK for demo
+      users[username] = { password }; 
       saveUsers(users);
       localStorage.setItem("currentUser", username);
 
