@@ -2,7 +2,7 @@
 -------------
 
 A small web-based game featuring user signup/login, a playable game screen, and a leaderboard to track top scores. 
-live demo: https://simplegame-git-main-michael-kassies-projects.vercel.app/
+live demo: https://simplegame-phi.vercel.app/
 
 ## Tech Stack  
 - Frontend: HTML5, CSS3, JavaScript  
@@ -45,3 +45,4 @@ live demo: https://simplegame-git-main-michael-kassies-projects.vercel.app/
 
 
     
+
