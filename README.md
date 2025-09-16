@@ -4,6 +4,10 @@
 A small web-based game featuring user signup/login, a playable game screen, and a leaderboard to track top scores. 
 live demo: https://simplegame-phi.vercel.app/
 
+## Demo Recordings
+- [Gameplay Recording](assets/playandstore.mp4)
+- [Sign In Recording and Sign Out Recording](assets/signuplogin.mp4)
+
 ## Tech Stack  
 - Frontend: HTML5, CSS3, JavaScript  
 - Backend: Node.js (Express)  
@@ -45,4 +49,7 @@ live demo: https://simplegame-phi.vercel.app/
 
 
     
+
+
+
 
