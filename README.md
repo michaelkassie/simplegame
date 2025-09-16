@@ -6,7 +6,7 @@ live demo: https://simplegame-phi.vercel.app/
 
 ## Demo Recordings
 - [Gameplay Recording](assets/playandstore.mp4)
-- [Sign In Recording and Sign Out Recording](assets/signuplogin.mp4)
+- [Sign In Recording and Sign Out Recording](assets/signupandlogin.mp4)
 
 ## Tech Stack  
 - Frontend: HTML5, CSS3, JavaScript  
@@ -49,6 +49,7 @@ live demo: https://simplegame-phi.vercel.app/
 
 
     
+
 
 
 
