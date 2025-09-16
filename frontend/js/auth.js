@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       store.setItem("users", JSON.stringify(users));
     } catch {
-      /* ignore */
+     
     }
   }
 
@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      users[username] = { password }; // demo-only (plaintext)
+      users[username] = { password }; 
       saveUsers(users);
       try { store.setItem("currentUser", username); } catch {}
 
